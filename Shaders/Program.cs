@@ -136,11 +136,14 @@ namespace Shaders
             IInputContext input = window.CreateInput();
             for (int i = 0; i < input.Keyboards.Count; i++)
                 input.Keyboards[i].KeyDown += KeyDown;
-            
             gl = GL.GetApi(window);
-
+            CreateModel();
+            MakeShaderProgram();
             gl.ClearColor(Color.FromArgb(255, 255, 255, 255));
-            
+        }
+
+        private static unsafe void CreateModel()
+        {
             vao = gl.GenVertexArray();
             gl.BindVertexArray(vao);
 
@@ -160,27 +163,23 @@ namespace Shaders
                 indices.AsSpan(), BufferUsageARB.StaticDraw
             );
 
-            uint vShader = gl.CreateShader(ShaderType.VertexShader);
-            gl.ShaderSource(vShader, vsh);
-            gl.CompileShader(vShader);
+            gl.EnableVertexAttribArray(0);
+            gl.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), (void*)0);
+            
+            gl.EnableVertexAttribArray(1);
+            gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+        }
 
-            string infoLog = gl.GetShaderInfoLog(vShader);
-            if (!string.IsNullOrWhiteSpace(infoLog))
-                Console.WriteLine($"Error compiling vertex shader: {infoLog}");
-
-            uint fShader = gl.CreateShader(ShaderType.FragmentShader);
-            gl.ShaderSource(fShader, fragmentShaders[variant]);
-            gl.CompileShader(fShader);
-
-            infoLog = gl.GetShaderInfoLog(fShader);
-            if (!string.IsNullOrWhiteSpace(infoLog))
-                Console.WriteLine($"Error compiling fragment shader: {infoLog}");
+        private static void MakeShaderProgram()
+        {
+            uint vShader = MakeShader(vsh, ShaderType.VertexShader);
+            uint fShader = MakeShader(fragmentShaders[variant], ShaderType.FragmentShader);
 
             program = gl.CreateProgram();
             gl.AttachShader(program, vShader);
             gl.AttachShader(program, fShader);
             gl.LinkProgram(program);
-            infoLog = gl.GetProgramInfoLog(program);
+            string infoLog = gl.GetProgramInfoLog(program);
             if (!string.IsNullOrWhiteSpace(infoLog)) {
                 Console.WriteLine($"Error linking shader: {infoLog}");
                 gl.DeleteProgram(program);
@@ -191,12 +190,18 @@ namespace Shaders
 
             gl.DetachShader(program, fShader);
             gl.DeleteShader(fShader);
+        }
 
-            gl.EnableVertexAttribArray(0);
-            gl.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), (void*)0);
-            
-            gl.EnableVertexAttribArray(1);
-            gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+        private static uint MakeShader(string code, ShaderType type)
+        {
+            uint shader = gl.CreateShader(type);
+            gl.ShaderSource(shader, code);
+            gl.CompileShader(shader);
+
+            string infoLog = gl.GetShaderInfoLog(shader);
+            if (!string.IsNullOrWhiteSpace(infoLog))
+                Console.WriteLine($"Error compiling vertex shader: {infoLog}");
+            return shader;
         }
 
         private static void KeyDown(IKeyboard arg1, Key arg2, int arg3)
