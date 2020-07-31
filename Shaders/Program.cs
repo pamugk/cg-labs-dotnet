@@ -153,7 +153,7 @@ namespace Shaders
             );
 
             ibo = gl.GenBuffer();
-            gl.BindBuffer(BufferTargetARB.ArrayBuffer,ibo);
+            gl.BindBuffer(BufferTargetARB.ElementArrayBuffer,ibo);
             gl.BufferData(
                 BufferTargetARB.ElementArrayBuffer, 
                 (uint)indices.Length * sizeof(uint),
