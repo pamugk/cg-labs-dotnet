@@ -113,12 +113,6 @@ namespace Shaders
                 variant = passedVariant;
                 
             var options = WindowOptions.Default;
-            options.API = new GraphicsAPI(
-                ContextAPI.OpenGL, 
-                ContextProfile.Core, 
-                ContextFlags.ForwardCompatible, 
-                new APIVersion(3, 3)
-            );
             options.Size = new Size(1024, 768);
             options.Title = "Пример использования шейдеров в OpenGL";
             window = Window.Create(options);
