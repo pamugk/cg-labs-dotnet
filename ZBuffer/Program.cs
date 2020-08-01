@@ -27,56 +27,57 @@ namespace ZBuffer
         #endregion
         
          #region Shaders
-        private const string vsh = @"
-            #version 330 
+        private const string vsh = 
+@"#version 330 
             
-            layout(location = 0) in vec2 a_position;
-            layout(location = 1) in vec3 a_color;
+layout(location = 0) in vec2 a_position;
+layout(location = 1) in vec3 a_color;
             
-            uniform mat4 u_mvp;
-            uniform mat3 u_n;
-            uniform float u_mph;
-            uniform float u_mc;
-            out vec3 v_color;
-            out vec3 v_normal;
-            out vec3 v_pos;
+uniform mat4 u_mvp;
+uniform mat3 u_n;
+uniform float u_mph;
+uniform float u_mc;
+            
+out vec3 v_color;
+out vec3 v_normal;
+out vec3 v_pos;
 
-            void main()
-            {
-                v_color = a_color;
-                float x = a_position[0];
-                float z = a_position[1];
-                float y = u_mph * sin((x * x + z * z) * 3.14 * u_mc);
-                v_pos = vec3(x, y, z);
-                v_normal = normalize(u_n * vec3(-u_mph * 2.0 * x * u_mc * 3.14 * cos((x * x + z * z) * 3.14 * u_mc), 1.0, -u_mph * 2.0 * z * u_mc * 3.14 * cos((x * x + z * z) * 3.14 * u_mc)));
-                gl_Position = u_mvp * vec4(v_pos, 1.0);
-            }";
+void main()
+{
+    v_color = a_color;
+    float x = a_position[0];
+    float z = a_position[1];
+    float y = u_mph * sin((x * x + z * z) * 3.14 * u_mc);
+    v_pos = vec3(x, y, z);
+    v_normal = normalize(u_n * vec3(-u_mph * 2.0 * x * u_mc * 3.14 * cos((x * x + z * z) * 3.14 * u_mc), 1.0, -u_mph * 2.0 * z * u_mc * 3.14 * cos((x * x + z * z) * 3.14 * u_mc)));
+    gl_Position = u_mvp * vec4(v_pos, 1.0);
+}";
 
-        private static string fsh = @"
-            #version 330
+        private static string fsh = 
+@"#version 330
 
-            uniform vec3 u_olpos;
-            uniform vec3 u_olcol;
-            uniform vec3 u_oeye;
-            uniform float u_odmin;
-            uniform float u_osfoc;
+uniform vec3 u_olpos;
+uniform vec3 u_olcol;
+uniform vec3 u_oeye;
+uniform float u_odmin;
+uniform float u_osfoc;
             
-            in vec3 v_color;
-            in vec3 v_normal;
-            in vec3 v_pos;
+in vec3 v_color;
+in vec3 v_normal;
+in vec3 v_pos;
             
-            layout(location = 0) out vec4 o_color;
+layout(location = 0) out vec4 o_color;
             
-            void main()
-            {
-            vec3 l = normalize(v_pos - u_olpos);
-            float cosa = dot(l, v_normal);
-            float d = max(cosa, u_odmin);
-            vec3 r = reflect(l, v_normal);
-            vec3 e = normalize(u_oeye - v_pos);
-            float s = max(pow(dot(r, e), u_osfoc), 0.0) * (int(cosa >= 0.0));
-            o_color = vec4(u_olcol * (d * v_color + s), 1.0);
-            }";
+void main()
+{
+    vec3 l = normalize(v_pos - u_olpos);
+    float cosa = dot(l, v_normal);
+    float d = max(cosa, u_odmin);
+    vec3 r = reflect(l, v_normal);
+    vec3 e = normalize(u_oeye - v_pos);
+    float s = max(pow(dot(r, e), u_osfoc), 0.0) * (int(cosa >= 0.0));
+    o_color = vec4(u_olcol * (d * v_color + s), 1.0);
+}";
         #endregion
 
         private static IWindow window;
