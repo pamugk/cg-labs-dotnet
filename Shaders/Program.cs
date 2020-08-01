@@ -1,11 +1,11 @@
-﻿using Silk.NET.Input;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using Silk.NET.Input;
 using Silk.NET.Input.Common;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Silk.NET.Windowing.Common;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
 
 namespace Shaders
 {
@@ -16,7 +16,7 @@ namespace Shaders
             LINES,
             WAVES,
             CIRCLES
-        };
+        }
 
         private static Variants variant;
 
@@ -49,7 +49,7 @@ namespace Shaders
         }
         ";
 
-        private static Dictionary<Variants, string> fragmentShaders = new Dictionary<Variants, string>()
+        private static Dictionary<Variants, string> fragmentShaders = new Dictionary<Variants, string>
         {
             {
                 Variants.LINES,
@@ -108,7 +108,7 @@ namespace Shaders
             variant = Variants.LINES;
             if (
                 args.Length > 0 &&
-                Enum.TryParse<Variants>(args[0], true, out Variants passedVariant)
+                Enum.TryParse(args[0], true, out Variants passedVariant)
             )
                 variant = passedVariant;
                 
@@ -125,7 +125,7 @@ namespace Shaders
             window.Run();
         }
 
-        private static unsafe void OnLoad()
+        private static void OnLoad()
         {
             IInputContext input = window.CreateInput();
             for (int i = 0; i < input.Keyboards.Count; i++)

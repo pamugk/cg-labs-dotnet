@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Common
 {
-    class MVPMatrix
+    public class MVPMatrix
     {
         //Размерность матрицы
         private const int n = 4;
@@ -152,6 +152,14 @@ namespace Common
         {
             float tg = MathF.Tan(MathF.PI / 180.0f * fovAngle / 2.0f);
             return GetPerspectiveProjectionMatrix(-n * tg, n * tg, -n * w / h *tg, n * w / h * tg, n, f);
+        }
+
+        public override int GetHashCode() =>
+            Content.GetHashCode();
+
+        public override string ToString()
+        {
+            return base.ToString();
         }
 
         //Оператор "равно"
