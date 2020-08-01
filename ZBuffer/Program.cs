@@ -26,7 +26,7 @@ namespace ZBuffer
         private static MVPMatrix v;
         #endregion
         
-         #region Shaders
+        #region Shaders
         private const string vsh = 
 @"#version 330 
             
