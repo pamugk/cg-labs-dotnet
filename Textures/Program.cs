@@ -117,7 +117,7 @@ void main()
             new float[]{ N, N, N },
             new float[]{ 1.0f, 1.0f, 1.0f}, 
             new float[]{ 0.0f, 0.0f, 0.0f }, 
-            0.25f, SFoc: 4.0f
+            0.5f, SFoc: 4.0f
         );
 
         private static int g_ulie;
@@ -162,6 +162,9 @@ void main()
             Console.WriteLine("Развлекайтесь!");
 
             var options = WindowOptions.Default;
+            options.ShouldSwapAutomatically = true;
+            options.API = new GraphicsAPI(
+                ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.ForwardCompatible, new APIVersion(3, 3));
             options.Size = new System.Drawing.Size(1024, 768);
             options.Title = "Пример работы с Z-буфером (а по пути с освещением и клавиатурным управлением)";
             window = Window.Create(options);
@@ -280,6 +283,9 @@ void main()
                 {
                     vertices[i++] = x;
                     vertices[i++] = z;
+
+                    vertices[i++] = 1.0f * x / N;
+                    vertices[i++] = 1.0f * z / N;
 
                     vertices[i++] = 0.25f;
                     vertices[i++] = 0.5f;
