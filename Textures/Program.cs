@@ -166,7 +166,7 @@ void main()
             options.API = new GraphicsAPI(
                 ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.ForwardCompatible, new APIVersion(3, 3));
             options.Size = new System.Drawing.Size(1024, 768);
-            options.Title = "Пример работы с Z-буфером (а по пути с освещением и клавиатурным управлением)";
+            options.Title = "Пример использования текстур";
             window = Window.Create(options);
 
             window.Load += OnLoad;

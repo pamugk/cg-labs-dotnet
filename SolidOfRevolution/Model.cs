@@ -160,13 +160,11 @@ namespace SolidOfRevolution
                 return;
 
             foreach (var s in curve)
-            {
                 for (int i = 0; i < TBezier.RESOLUTION; ++i)
                 {
                     Point2D p = s.Calc((double)i / (double)TBezier.RESOLUTION);
                     curvePoints.Add(new Point3D(p.X, p.Y, 1.0));
                 }
-            }
 
             PreparePoints(curvePoints, CurveIndices, CurveVertices, 0);
             TriangulizeCurve(curvePoints, CurveIndices, 0);

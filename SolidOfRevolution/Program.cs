@@ -10,6 +10,7 @@ using Silk.NET.Windowing.Common;
 
 namespace SolidOfRevolution
 {
+    using KeyHandler = System.Action<IKeyboard, Key, int>;
     class Program
     {
         private static IWindow window;
@@ -22,6 +23,21 @@ namespace SolidOfRevolution
         };
 
         private static States state;
+        private static Dictionary<States, KeyHandler> keyHandlers = new Dictionary<States, KeyHandler>
+        {
+            {
+                States.BasePoints,
+                BasicPointsKeyDown
+            },
+            {
+                States.Curve,
+                CurveKeyDown
+            },
+            {
+                States.SolidOfRevolution,
+                SolidOfResolutionKeyDown
+            }
+        };
 
         private static Model model;
         private static float[] vertices;
@@ -51,7 +67,7 @@ out vec3 v_normal;
 void main()
 {
     v_color = a_color;
-    v_pos = v_pos;
+    v_pos = a_position;
     v_normal = vec3(0.0,0.0,0.0);
     gl_Position = u_mvp * vec4(a_position, 1.0);
 }";
@@ -107,6 +123,9 @@ void main()
 
         static void Main(string[] args)
         {
+            vertices = new float[0];
+            indices = new uint[0];
+
             v = MVPMatrix.GetIdentityMatrix().Move(0.0f, 0.0f, 2.0f);
             model = new Model();
             model.PointRadius = 0.015; 
@@ -132,7 +151,7 @@ void main()
 
             var options = WindowOptions.Default;
             options.Size = new Size(1024, 768);
-            options.Title = "Пример работы с Z-буфером (а по пути с освещением и клавиатурным управлением)";
+            options.Title = "Пример динамического формирования модели";
             window = Window.Create(options);
 
             window.Load += OnLoad;
@@ -256,135 +275,134 @@ void main()
 
         private static void KeyDown(IKeyboard keyboard, Key key, int arg3)
         {
-            switch (state)
+            keyHandlers[state](keyboard, key, arg3);
+        }
+
+        private static void BasicPointsKeyDown(IKeyboard keyboard, Key key, int arg3)
+        {
+            switch (key)
             {
-                case States.BasePoints:
+                case Key.Space:
                 {
-                    switch (key)
-                    {
-                        case Key.Space:
-                        {
-                            model.ClearBasePoints();
-                            UpdateModel();
-                            break;
-                        }
-                        case Key.E:
-                        {
-                            model.ClearSolidOfRevolution();
-                            state = States.Curve;
-                            UpdateModel();
-                            break;
-                        }
-                    }
+                    model.ClearBasePoints();
+                    UpdateModel();
                     break;
                 }
-                case States.Curve:
+                case Key.E:
                 {
-                    switch (key)
-                    {
-                        case Key.Q:
-                        {
-                            model.ClearCurve();
-                            state = States.BasePoints;
-                            UpdateModel();
-                            break;
-                        }
-                        case Key.E:
-                        {
-                            model.FormSolidOfRevolution(15.0f);
-                            state = States.SolidOfRevolution;
-                            led.Enabled = true;
-                            UpdateModel();
-                            break;
-                        }
-                    }
+                    model.FormCurve();
+                    state = States.Curve;
+                    UpdateModel();
                     break;
                 }
-                case States.SolidOfRevolution:
+            }
+        }
+
+        private static void CurveKeyDown(IKeyboard keyboard, Key key, int arg3)
+        {
+            switch (key)
+            {
+                case Key.Q:
                 {
-                    if (key >= Key.Number1 && key < Key.Number1 + countOfSpeeds)
-                    {
-                        degree = degrees[key - Key.Number1];
-                        return;
-                    }
-                    switch (key)
-                    {
-                        case Key.Q:
-                        {
-                            model.ClearSolidOfRevolution();
-                            led.Enabled = false;
-                            state = States.Curve;
-                            UpdateModel();
-                            break;
-                        }
-                        case Key.Left:
-                        {
-                            model.RotateAboutY(degree);
-                            break;
-                        }
-                        case Key.Right:
-                        {
-                            model.RotateAboutY(-degree);
-                            break;
-                        }
-                        case Key.Up:
-                        {
-                            model.RotateAboutX(degree);
-                            break;
-                        }
-                        case Key.Down:
-                        {
-                            model.RotateAboutX(-degree);
-                            break;
-                        }
-                        case Key.W:
-                        {
-                            model.RotateAboutZ(degree);
-                            break;
-                        }
-                        case Key.S:
-                        {
-                            model.RotateAboutZ(-degree);
-                            break;
-                        }
+                    model.ClearCurve();
+                    state = States.BasePoints;
+                    UpdateModel();
+                    break;
+                }
+                case Key.E:
+                {
+                    model.FormSolidOfRevolution(15.0f);
+                    state = States.SolidOfRevolution;
+                    led.Enabled = true;
+                    UpdateModel();
+                    break;
+                }
+            }
+        }
 
-                        case Key.Keypad4:
-                        {
-                            g_optics.Position[0] -= lightStep;
-                            break;
-                        }
-                        case Key.Keypad6:
-                        {
-                            g_optics.Position[0] += lightStep;
-                            break;
-                        }
-                        case Key.Keypad5:
-                        {
-                            g_optics.Position[1] -= lightStep;
-                            break;
-                        }
-                        case Key.Keypad8:
-                        {
-                            g_optics.Position[1] += lightStep;
-                            break;
-                        }
-                        case Key.Keypad7:
-                        {
-                            g_optics.Position[2] -= lightStep;
-                            break;
-                        }
-                        case Key.Keypad9:
-                        {
-                            g_optics.Position[2] += lightStep;
-                            break;
-                        }
+        private static void SolidOfResolutionKeyDown(IKeyboard keyboard, Key key, int arg3)
+        {
+            if (key >= Key.Number1 && key < Key.Number1 + countOfSpeeds)
+            {
+                degree = degrees[key - Key.Number1];
+                return;
+            }
+            switch (key)
+            {
+                case Key.Q:
+                {
+                    model.ClearSolidOfRevolution();
+                    model.FormCurve();
+                    led.Enabled = false;
+                    state = States.Curve;
+                    UpdateModel();
+                    break;
+                }
+                case Key.Left:
+                {
+                    model.RotateAboutY(degree);
+                    break;
+                }
+                case Key.Right:
+                {
+                    model.RotateAboutY(-degree);
+                    break;
+                }
+                case Key.Up:
+                {
+                    model.RotateAboutX(degree);
+                    break;
+                }
+                case Key.Down:
+                {
+                    model.RotateAboutX(-degree);
+                    break;
+                }
+                case Key.W:
+                {
+                    model.RotateAboutZ(degree);
+                    break;
+                }
+                case Key.S:
+                {
+                    model.RotateAboutZ(-degree);
+                    break;
+                }
 
-                        case Key.Escape:
-                        {
-                            window.Close();
-                            break;
-                        }
-                    }
+                case Key.Keypad4:
+                {
+                    g_optics.Position[0] -= lightStep;
+                    break;
+                }
+                case Key.Keypad6:
+                {
+                    g_optics.Position[0] += lightStep;
+                    break;
+                }
+                case Key.Keypad5:
+                {
+                    g_optics.Position[1] -= lightStep;
+                    break;
+                }
+                case Key.Keypad8:
+                {
+                    g_optics.Position[1] += lightStep;
+                    break;
+                }
+                case Key.Keypad7:
+                {
+                    g_optics.Position[2] -= lightStep;
+                    break;
+                }
+                case Key.Keypad9:
+                {
+                    g_optics.Position[2] += lightStep;
+                    break;
+                }
+
+                case Key.Escape:
+                {
+                    window.Close();
                     break;
                 }
             }
@@ -394,10 +412,11 @@ void main()
         {
             if (button != MouseButton.Left || state != States.BasePoints)
                 return;
+            
             double w_2 = window.Size.Width / 2, h_2 = window.Size.Height / 2;
             model.AddBasePoint(new Point2D(
-                (mouse.Cursor.HotspotX - w_2) / w_2, 
-                ((window.Size.Height - mouse.Cursor.HotspotY) - h_2) / h_2)
+                (mouse.Position.X - w_2) / w_2, 
+                ((window.Size.Height - mouse.Position.Y) - h_2) / h_2)
             );
             UpdateModel();
         }

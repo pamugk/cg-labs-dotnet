@@ -77,10 +77,9 @@ namespace SolidOfRevolution
         public static bool TBezierSO0(List<Point2D> values, out List<Segment> curve)
         {
             int n = values.Count - 1;
-            curve = null;
+            curve = new List<Segment>();
             if (n < 2)
                 return false;
-            curve = new List<Segment>(n);
             Point2D cur, next, tgL, tgR = default(Point2D), deltaL, deltaC, deltaR;
             double l1, l2;
             next = values[1] - values[0];
@@ -118,6 +117,7 @@ namespace SolidOfRevolution
                     l1 = IS_ZERO(tgL.Y) ? 0.0 : deltaL.Y / tgL.Y;
                 if (Math.Abs(l2 * tgR.Y) > Math.Abs(deltaR.Y))
                     l2 = IS_ZERO(tgR.Y) ? 0.0 : deltaR.Y / tgR.Y;
+                curve.Add(new Segment());
                 curve[i].Points[0] = values[i];
                 curve[i].Points[1] = curve[i].Points[0] + tgL * l1;
                 curve[i].Points[3] = values[i + 1];
@@ -136,10 +136,9 @@ namespace SolidOfRevolution
         public static bool TBezierSO1(List<Point2D> values, out List<Segment> curve)
         {
             int n = values.Count - 1;
-            curve = null;
+            curve = new List<Segment>();
             if (n < 2)
                 return false;
-            curve = new List<Segment>(n);
             Point2D cur, next, tgL, tgR = default(Point2D), deltaC;
             double l1, l2, tmp, x;
             bool zL, zR;
@@ -201,6 +200,7 @@ namespace SolidOfRevolution
                         }
                     }
                 }
+                curve.Add(new Segment());
                 curve[i].Points[0] = values[i];
                 curve[i].Points[1] = curve[i].Points[0] + tgL * l1;
                 curve[i].Points[3] = values[i + 1];
